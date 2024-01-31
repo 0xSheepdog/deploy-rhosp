@@ -1,0 +1,28 @@
+---
+all:
+  children:
+    director:
+      hosts:
+        osdirector:
+          ansible_host: 127.0.0.1
+          idrac_ip: 172.20.1.155
+    controller:
+      hosts:
+        contr0:
+#          ansible_host: 127.0.0.1
+          idrac_ip: 172.20.1.183
+        contr1:
+#          ansible_host: 127.0.0.1
+          idrac_ip: 172.20.1.110
+        contr2:
+#          ansible_host: 127.0.0.1
+          idrac_ip: 172.20.1.109
+    compute:
+      hosts:
+        comp0:
+#          ansible_host: 127.0.0.1
+          idrac_ip: 172.20.1.186
+        comp1:
+#          ansible_host: 127.0.0.1
+          idrac_ip: 172.20.1.102
+...

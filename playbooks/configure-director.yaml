@@ -1,0 +1,14 @@
+---
+# Based on https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.2/html/director_installation_and_usage/assembly_preparing-for-director-installation
+# Chapter 3. Preparing for director installation
+
+- name: Prepare director for installation
+  hosts: director
+  become: true
+  tasks:
+  - name: create 'stack' user
+    user:
+
+  - name: Make 'images' and 'templates' directories
+    file:
+      
