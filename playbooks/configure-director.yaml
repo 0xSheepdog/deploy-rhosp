@@ -2,13 +2,100 @@
 # Based on https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/16.2/html/director_installation_and_usage/assembly_preparing-for-director-installation
 # Chapter 3. Preparing for director installation
 
-- name: Prepare director for installation
+- name: Play-01 Prepare director OS for installation
   hosts: director
   become: true
+  become_user: root
+  tasks:
+  - name: Configure satellite repos
+    rhsm_repository:
+      name:
+      - rhel-8-for-x86_64-baseos-eus-rpms
+      - rhel-8-for-x86_64-appstream-eus-rpms
+      - rhel-8-for-x86_64-highavailability-eus-rpms
+      - ansible-2.9-for-rhel-8-x86_64-rpms
+      - openstack-16.2-for-rhel-8-x86_64-rpms
+      - fast-datapath-for-rhel-8-x86_64-rpms
+      state: enabled
+      purge: true
+    tags: config-sat-repos
+
+  - name: Set the container-tools repository module to version 3.0
+    shell: "{{ item }}"
+    loop:
+    - "dnf module reset container-tools"
+    - "dnf module enable -y container-tools:3.0"
+    args:
+      warn: false
+    tags: config-container-tools
+
+  - name: Update all packages with dnf
+    dnf:
+      name: '*'
+      state: latest
+    tags: update-all
+
+  - name: Reboot after update
+    reboot:
+      reboot_timeout: 120
+    tags: system-reboot
+
+  - name: Install python3-tripleoclient package
+    dnf:
+      name: python3-tripleoclient
+      state: latest
+    tags: install-tripleoclient
+
+- name: Play-02 Setup 'stack' user and details
+  hosts: osdirector
   tasks:
   - name: create 'stack' user
+    become: true
+    become_user: root
     user:
+      name: 'stack'
+      generate_ssh_key: yes
+      expires: -1
+      password: "$6$mysecretsalt$UTa86iOzXp.wDah44J76747nyDkYDqzc0k9gAaj9dBFZP5RVOJsjhuc7/3G8zRMM/EY2BXQvfDhveoyHwatlL1"
+      # ChangeMe
+    tags: create-user
 
-  - name: Make 'images' and 'templates' directories
+  - name: Create sudo rule file
+    become: true
+    become_user: root
+    copy:
+      content: "stack ALL=(root) NOPASSWD:all"
+      dest: /etc/sudoers.d/stack
+      owner: 'root'
+      group: 'root'
+      mode: '0600'
+      validate: /usr/sbin/visudo -csf %s
+    tags: config-sudo
+
+  - name: Make 'images' and 'templates' directories in ~stack
+    become: true
+    become_user: stack
     file:
-      
+      state: directory
+      path: "/home/stack/{{ item }}"
+      owner: 'stack'
+      group: 'stack'
+      mode: '0750'
+    loop:
+    - 'images'
+    - 'templates'
+    tags: stack-folders
+
+  - name: Copy undercloud.conf template to ~stack
+    become: true
+    become_user: stack
+    copy:
+      src: /usr/share/python-tripleoclient/undercloud.conf.sample
+      dest: /home/stack/undercloud.conf
+      remote_src: true
+      owner: 'stack'
+      group: 'stack'
+      mode: '0644'
+    tags: cp-undercloud.conf
+
+...

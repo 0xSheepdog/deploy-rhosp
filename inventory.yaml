@@ -6,7 +6,7 @@ all:
         osdirector:
           ansible_host: 127.0.0.1
           idrac_ip: 172.20.1.155
-    controller:
+    controller_nodes:
       hosts:
         contr0:
 #          ansible_host: 127.0.0.1
@@ -17,7 +17,7 @@ all:
         contr2:
 #          ansible_host: 127.0.0.1
           idrac_ip: 172.20.1.109
-    compute:
+    compute_nodes:
       hosts:
         comp0:
 #          ansible_host: 127.0.0.1
