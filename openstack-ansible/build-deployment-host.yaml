@@ -1,0 +1,36 @@
+---
+- name: build deployment host
+  hosts: deployment-host
+  tasks:
+  - name: update all packages
+    ansible.builtin.dnf:
+      name: '*'
+      state: latest
+  - name: install additional packages
+    ansible.builtin.dnf:
+      name:
+      - git
+      - tmux
+      - vim-enhanced
+      - python3-devel
+      state: present
+  - name: install Development Tools group
+    ansible.builtin.dnf:
+      name: '@Development tools'
+      state: present
+  - name: disable firewalld.service
+    ansible.builtin.systemd_service:
+      name: firewalld.service
+      enabled: false
+      masked: no
+      state: stopped
+  - name: Clone openstack-ansible git-repo
+    ansible.builtin.git:
+      repo: https://opendev.org/openstack/openstack-ansible
+      version: 28.0.0
+      dest: /opt/openstack-ansible
+  - name: Run bootstrap-ansible.sh
+    command:
+      chdir: /opt/openstack-ansible
+      cmd: /opt/openstack-ansible/scripts/bootstrap-ansible.sh
+...

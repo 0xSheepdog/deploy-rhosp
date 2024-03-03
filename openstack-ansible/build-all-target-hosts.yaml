@@ -1,0 +1,28 @@
+---
+- name: build compute host
+  hosts: compute-host,controller-host
+  tasks:
+  - name: update all packages
+    ansible.builtin.dnf:
+      name: '*'
+      state: latest
+  - name: install additional packages
+    ansible.builtin.dnf:
+      name:
+      - iputils
+      - lsof
+      - python3
+      - tcpdump
+      state: present
+  - name: disable firewalld.service
+    ansible.builtin.systemd_service:
+      name: firewalld.service
+      enabled: false
+      masked: no
+      state: stopped
+  - name: reduce kernel log level
+    ansible.builtin.shell:
+      cmd: echo "kernel.printk='4 1 7 4'" >> /etc/sysctl.conf
+  - name: reboot to active kernel changes
+    reboot:
+...

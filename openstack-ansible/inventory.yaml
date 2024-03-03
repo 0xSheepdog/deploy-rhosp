@@ -1,0 +1,7 @@
+---
+ungrouped:
+  hosts:
+    deployment-host:
+    controller-host:
+    compute-host:
+...
